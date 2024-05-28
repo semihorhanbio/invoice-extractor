@@ -1,19 +1,14 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "main.py",
-      "use": "python",
-      "config": {
-        "runtime": "python-3.8",
-        "buildEnv": {
-          "PIP_TARGET": "./vendor"
-        }
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "(.*)",
+      "src": "/(.*)",
       "dest": "main.py"
     }
   ]
