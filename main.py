@@ -7,6 +7,11 @@ app = FastAPI()
 # reader = Reader(['tr'])
 
 
+@app.get("/")
+def health_check():
+    return {"message": "api is working"}
+
+
 @app.post("/extract/")
 async def create_upload_files(files: list[UploadFile] = File(...)):
     extracted_data = {}
