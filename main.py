@@ -9,11 +9,13 @@ app = FastAPI()
 
 @app.get("/")
 def health_check():
-    return {"message": "api is working!!!"}
+    return {
+        "message": "Go to /docs route to see available routes. Send a post request /extract to extract data"
+    }
 
 
 @app.post("/extract/")
-async def create_upload_files(files: list[UploadFile] = File(...)):
+async def extract_data(files: list[UploadFile] = File(...)):
     extracted_data = {}
     for file in files:
         if file.content_type.startswith("application/pdf"):
