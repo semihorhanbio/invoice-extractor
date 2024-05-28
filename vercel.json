@@ -1,0 +1,20 @@
+{
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "python",
+      "config": {
+        "runtime": "python-3.8",
+        "buildEnv": {
+          "PIP_TARGET": "./vendor"
+        }
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "(.*)",
+      "dest": "main.py"
+    }
+  ]
+}
