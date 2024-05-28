@@ -9,7 +9,7 @@ app = FastAPI()
 
 @app.get("/")
 def health_check():
-    return {"message": "api is working"}
+    return {"message": "api is working!!!"}
 
 
 @app.post("/extract/")
