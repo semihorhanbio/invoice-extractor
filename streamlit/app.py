@@ -35,7 +35,7 @@ def process_pdf(uploaded_file):
 
 
 def get_image_response(image, prompt):
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-1.5-pro")
     response = model.generate_content([image[0], prompt])
     return response
 
@@ -58,12 +58,12 @@ def input_image_setup(uploaded_file):
 
 
 model = genai.GenerativeModel(
-    "gemini-1.5-flash", generation_config={"response_mime_type": "application/json"}
+    "gemini-1.5-pro", generation_config={"response_mime_type": "application/json"}
 )
 
 prompt = """
   You are a specialist in comprehending invoices. Input files in the form of invoices will be provided to you, and your task is to convert invoice data into json format. If the requirement information is not found, set "no value". The required properties in JSON object are as follows.
-  Invoice = {"invoice_total": str, "customer_name": str, "customer_vkn": str, invoice_date: date}
+  Invoice = {"customer_name": str, "customer_vkn": int, customer_tckn": int, "vendor_name": str, "vendor_vkn": int, vendor_tckn": int, invoice_senario: str, invoice_type: str, invoice_no: str, invoice_date: date, total_of_goods_and_services: float, calculated_vat: float, invoice_total: float, invoice_lines: list[goods_and_services_name: str, goods_and_services_quantity: int, goods_and_services_unit_price: float, goods_and_services_vat_rate: float, goods_and_services_total: float]}
   Return a `Invoice`
   """
 
