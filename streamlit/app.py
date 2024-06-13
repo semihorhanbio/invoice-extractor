@@ -35,7 +35,7 @@ def process_pdf(uploaded_file):
 
 
 def get_image_response(image, prompt):
-    model = genai.GenerativeModel("gemini-1.5-pro")
+    model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content([image[0], prompt])
     return response
 
@@ -58,7 +58,7 @@ def input_image_setup(uploaded_file):
 
 
 model = genai.GenerativeModel(
-    "gemini-1.5-pro", generation_config={"response_mime_type": "application/json"}
+    "gemini-1.5-flash", generation_config={"response_mime_type": "application/json"}
 )
 
 prompt = """
