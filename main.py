@@ -14,12 +14,12 @@ app.add_middleware(
 )
 
 
-app.include_router(ocr.router, prefix="/inference", tags=["OCR"])
+app.include_router(ocr.router, prefix="/", tags=["OCR"])
 
 
 @app.get("/")
 async def root():
-    return {"message": "Sparrow OCR API"}
+    return {"message": "OCR API"}
 
 
 if __name__ == "__main__":
