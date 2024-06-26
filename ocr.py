@@ -2,11 +2,13 @@ from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status
 from fastapi.responses import JSONResponse
 from typing import Optional
 from functools import lru_cache
+import paddle
 from paddleocr import PaddleOCR
 from PIL import Image
 import urllib.request
 from io import BytesIO
 import os
+import json
 import time
 import io
 from utils import extract_pdf
@@ -19,7 +21,9 @@ client = Groq(api_key="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"
 
 @lru_cache(maxsize=1)
 def load_ocr_model():
-    model = PaddleOCR(use_angle_cls=True, lang='en')
+    # Set the use_gpu flag to False
+    paddle.set_device('cpu')
+    model = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
     return model
 
 
@@ -67,7 +71,7 @@ def invoke_ocr(doc, content_type):
 
 
 @router.post("/inference")
-async def inference(file: Optional[UploadFile] = File(None), image_url: Optional[str] = Form(None)):
+async def inference(file: Optional[UploadFile] = File(None)):
     result = None
     if file:
         if file.content_type in ["image/jpeg", "image/jpg", "image/png"]:
@@ -80,27 +84,28 @@ async def inference(file: Optional[UploadFile] = File(None), image_url: Optional
             return {"error": "Invalid file type. Only JPG/PNG images and PDF are allowed."}
 
         completion = client.chat.completions.create(
-    model="llama3-8b-8192",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a specialist in comprehending invoices. Input files in the form of invoices will be provided to you, and your task is to convert invoice data into json format. If the requirement information is not found, set \"no value\". The required properties in JSON object are as follows.\n  Invoice = {\"customer_name\": str, \"customer_vkn\": int, customer_tckn\": int, \"vendor_name\": str, \"vendor_vkn\": int, vendor_tckn\": int, invoice_senario: str, invoice_type: str, invoice_no: str, invoice_date: date, total_of_goods_and_services: float, calculated_vat: float, invoice_total: float, invoice_lines: list[goods_and_services_name: str, goods_and_services_quantity: int, goods_and_services_unit_price: float, goods_and_services_vat_rate: float, goods_and_services_total: float]}\n  Return just a `Invoice` in json format no additional info."
-            },
-            {
-                "role": "user",
-                "content": text
-            },
+            model="llama3-8b-8192",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a specialist in comprehending invoices. Input files in the form of invoices will be provided to you, and your task is to convert invoice data into json format. If the requirement information is not found, set \"no value\". The required properties in JSON object are as follows.\n  Invoice = {\"customer_name\": str, \"customer_vkn\": int, customer_tckn\": int, \"vendor_name\": str, \"vendor_vkn\": int, vendor_tckn\": int, invoice_senario: str, invoice_type: str, invoice_no: str, invoice_date: date, total_of_goods_and_services: float, calculated_vat: float, invoice_total: float, invoice_lines: list[goods_and_services_name: str, goods_and_services_quantity: int, goods_and_services_unit_price: float, goods_and_services_vat_rate: float, goods_and_services_total: float]}\n  Return just a `Invoice` in json format no additional info."
+                },
+                {
+                    "role": "user",
+                    "content": text
+                },
 
-        ],
-        temperature=0.1,
-        max_tokens=1024,
-        top_p=1,
-        stream=True,
-        stop=None,
-)
+            ],
+            temperature=0,
+            max_tokens=1024,
+            top_p=1,
+            stream=False,
+            stop=None,
+            response_format={"type": "json_object"},
+        )
+        result = completion.choices[0].message.content
+        result = json.loads(result)
 
-        for chunk in completion:
-            print(chunk.choices[0].delta.content or ""
 
         print(f"Processing time OCR: {processing_time:.2f} seconds")
         
