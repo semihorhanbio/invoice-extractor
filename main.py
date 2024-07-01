@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from routers import ocr
+from ocr import router
 
 app = FastAPI()
 
@@ -14,7 +14,7 @@ app.add_middleware(
 )
 
 
-app.include_router(ocr.router, prefix="/", tags=["OCR"])
+app.include_router(router, prefix="/ocr", tags=["OCR"])
 
 
 @app.get("/")
