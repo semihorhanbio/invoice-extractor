@@ -2,15 +2,19 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, status
 from fastapi.responses import JSONResponse
 import easyocr
 import numpy as np
-from PIL import Image
 import cv2
 import json
 from utils import extract_pdf
 from groq import Groq
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+groq_api_key = os.getenv("GROQ_API_KEY")
 
 reader = easyocr.Reader(["en", "tr"], gpu=False)
 router = APIRouter()
-client = Groq(api_key="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")
+client = Groq(api_key=groq_api_key)
 
 
 def invoke_ocr(file_contents: bytes) -> str:
@@ -43,7 +47,7 @@ async def inference(file: UploadFile = File(...)):
             }
 
         completion = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama3-70b-8192",
             messages=[
                 {
                     "role": "system",
