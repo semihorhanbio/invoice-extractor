@@ -1,10 +1,8 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException, status
 from fastapi.responses import JSONResponse
-import easyocr
-import numpy as np
-import cv2
+import pytesseract
 import json
-from utils import extract_pdf
+from utils import extract_pdf, save_file_to_server
 from groq import Groq
 from dotenv import load_dotenv
 import os
@@ -12,23 +10,19 @@ import os
 load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
 
-reader = easyocr.Reader(["en", "tr"], gpu=False)
 router = APIRouter()
-client = Groq(api_key=groq_api_key)
+groq_client = Groq(api_key=groq_api_key)
 
 
-def invoke_ocr(file_contents: bytes) -> str:
+def invoke_ocr(img_path: str) -> str:
     """
     Extract text from an image using EasyOCR
     """
-    img_array = np.frombuffer(file_contents, np.uint8)
-    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     try:
-        result = reader.readtext(img)
-        text = "".join([res[1] for res in result])
-    except Exception as e:
-        return {"error": str(e)}
-    return text
+        text = pytesseract.image_to_string(img_path)
+        return text
+    except:
+        return "[ERROR] Unable to process file: {0}".format(img_path)
 
 
 @router.post("/inference")
@@ -36,8 +30,9 @@ async def inference(file: UploadFile = File(...)):
     result = None
     if file:
         if file.content_type in ["image/jpeg", "image/jpg", "image/png"]:
-            contents = await file.read()
-            text = invoke_ocr(contents)
+            print("Images Uploaded: ", file.filename)
+            temp_file = save_file_to_server(file, path="./", save_as=file.filename)
+            text = invoke_ocr(temp_file)
         elif file.content_type == "application/pdf":
             pdf_bytes = await file.read()
             text = extract_pdf(pdf_bytes)
@@ -46,7 +41,7 @@ async def inference(file: UploadFile = File(...)):
                 "error": "Invalid file type. Only JPG/PNG images and PDF are allowed."
             }
 
-        completion = client.chat.completions.create(
+        completion = groq_client.chat.completions.create(
             model="llama3-70b-8192",
             messages=[
                 {
