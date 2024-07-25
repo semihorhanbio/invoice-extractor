@@ -1,6 +1,7 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException, status
 from fastapi.responses import JSONResponse
-#import pytesseract
+
+# import pytesseract
 import json
 from utils import extract_pdf, encode_image, call_openai_api
 from groq import Groq
@@ -21,10 +22,10 @@ async def inference(file: UploadFile = File(...)):
     if file:
         if file.content_type in ["image/jpeg", "image/jpg", "image/png"]:
             print("Images Uploaded: ", file.filename)
-            image_base64 = encode_image(file)
+            image_base64 = await encode_image(file)
             response = call_openai_api(image_base64, openai_api_key)
-            result = json.loads( response.choices[0].message.content)
-            return JSONResponse(content=result, media_type="application/json")
+            # result = json.loads(response.choices[0].message.content)
+            return JSONResponse(content=response, media_type="application/json")
         elif file.content_type == "application/pdf":
             pdf_bytes = await file.read()
             text = extract_pdf(pdf_bytes)
