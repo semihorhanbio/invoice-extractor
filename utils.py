@@ -42,7 +42,6 @@ def call_openai_api(image_base64, openai_api_key):
     }
     payload = {
         "model": "gpt-4o-mini",
-        "response_format": {"type": "json_object"},
         "messages": [
             {
                 "role": "user",
@@ -51,7 +50,7 @@ def call_openai_api(image_base64, openai_api_key):
                     {
                         "type": "image_url",
                         "image_url": {
-                            "url": f"data:image/jpeg;base64,{image_base64}",
+                            "url": f"data:image/jpg;base64,{image_base64}",
                             "detail": "low",
                         },
                     },
