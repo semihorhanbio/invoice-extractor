@@ -58,7 +58,7 @@ def call_openai_api(image_base64, openai_api_key):
                 ],
             }
         ],
-        "max_tokens": 300,
+        "max_tokens": 800,
     }
 
     response = requests.post(
