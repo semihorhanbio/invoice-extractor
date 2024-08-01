@@ -21,11 +21,17 @@ async def inference(file: UploadFile = File(...)):
     result = None
     if file:
         if file.content_type in ["image/jpeg", "image/jpg", "image/png"]:
-            print("Images Uploaded: ", file.filename)
-            image_base64 = await encode_image(file)
-            response = call_openai_api(image_base64, openai_api_key)
-            # result = json.loads(response.choices[0].message.content)
-            return JSONResponse(content=response, media_type="application/json")
+            try:
+                image_base64 = await encode_image(file)
+                response = call_openai_api(
+                    image_base64, openai_api_key, file.content_type.lower()
+                )
+                result = response["choices"][0]["message"]["content"]
+                result = result.replace("```", "").replace("json", "")
+                result = json.loads(result)
+            except:
+                return {"error": "Taranmış fatura işlenememektedir."}
+            return JSONResponse(content=result, media_type="application/json")
         elif file.content_type == "application/pdf":
             pdf_bytes = await file.read()
             text = extract_pdf(pdf_bytes)
