@@ -30,14 +30,17 @@ async def inference(file: UploadFile = File(...)):
                 result = result.replace("```", "").replace("json", "")
                 result = json.loads(result)
             except:
-                return {"error": "Taranmış fatura işlenememektedir."}
+                return {
+                    "error": "Taranmış fatura işlenememektedir.",
+                    "detail": response,
+                }
             return JSONResponse(content=result, media_type="application/json")
         elif file.content_type == "application/pdf":
             pdf_bytes = await file.read()
             text = extract_pdf(pdf_bytes)
         else:
             return {
-                "error": "Invalid file type. Only JPG/PNG images and PDF are allowed."
+                "error": "Invalid file type. Only JPG/PNG images and PDF are allowed.",
             }
 
         completion = groq_client.chat.completions.create(

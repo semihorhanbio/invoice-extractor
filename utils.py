@@ -36,6 +36,26 @@ async def encode_image(file):
 
 
 def call_openai_api(image_base64, openai_api_key, img_type):
+    prompt = """
+Convert the invoice data from the image into JSON format. If the required information is not found, set it as "no value". The required properties in the JSON object are as follows:
+
+Invoice = {
+    "customer_name": str,
+    "customer_vkn": int,
+    "customer_tckn": int,
+    "vendor_name": str,
+    "vendor_vkn": int,
+    "vendor_tckn": int,
+    "invoice_senario": str,
+    "invoice_type": str,
+    "invoice_no": str,
+    "invoice_date": date,
+    "total_of_goods_and_services": float,
+    "calculated_vat": float,
+    "invoice_total": float,
+    "invoice_lines": list[goods_and_services_name: str, goods_and_services_quantity: int, goods_and_services_unit_price: float, goods_and_services_vat_rate: float, goods_and_services_total: float]
+}
+"""
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {openai_api_key}",
@@ -48,19 +68,19 @@ def call_openai_api(image_base64, openai_api_key, img_type):
                 "content": [
                     {
                         "type": "text",
-                        "text": 'You are a specialist in comprehending invoices. Input files in the form of invoices will be provided to you, and your task is to convert invoice data into json format. If the requirement information is not found, set "no value". The required properties in JSON object are as follows.\n  Invoice = {"customer_name": str, "customer_vkn": int, customer_tckn": int, "vendor_name": str, "vendor_vkn": int, vendor_tckn": int, invoice_senario: str, invoice_type: str, invoice_no: str, invoice_date: date, total_of_goods_and_services: float, calculated_vat: float, invoice_total: float, invoice_lines: list[goods_and_services_name: str, goods_and_services_quantity: int, goods_and_services_unit_price: float, goods_and_services_vat_rate: float, goods_and_services_total: float]}\n  Return just a `Invoice` in json format no additional info.',
+                        "text": prompt,
                     },
                     {
                         "type": "image_url",
                         "image_url": {
                             "url": f"data:{img_type};base64,{image_base64}",
-                            "detail": "low",
+                            "detail": "high",
                         },
                     },
                 ],
             }
         ],
-        "max_tokens": 800,
+        "max_tokens": 1000,
     }
 
     response = requests.post(
