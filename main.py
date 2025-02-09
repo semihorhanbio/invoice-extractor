@@ -13,9 +13,11 @@ app.add_middleware(
 )
 
 
-app.include_router(router, prefix="/api", tags=["Invoice"])
+app.include_router(router, prefix="/api", tags=["Invoice-Receipt-Extraction"])
 
 
 @app.get("/")
 async def root():
-    return {"message": "OCR API"}
+    return {
+        "message": "Invoice and Receipt Extraction API routes: /api/extract-invoice, /api/extract-receipt"
+    }

@@ -55,3 +55,30 @@ class Invoice(BaseModel):
     invoice_lines: List[InvoiceLine] = Field(
         default_factory=list, description="List of invoice lines."
     )
+
+
+class ReceiptLine(BaseModel):
+    item_name: Optional[str] = Field("no value", description="Name of the item.")
+    item_total_price: Optional[float] = Field(
+        "no value", description="Total price for the item."
+    )
+
+
+class Receipt(BaseModel):
+    store_name: Optional[str] = Field("no value", description="Name of the store.")
+    store_tax_id: Optional[str] = Field("no value", description="Tax ID of the store.")
+    receipt_date: Optional[str] = Field("no value", description="Date of the receipt.")
+    receipt_time: Optional[str] = Field("no value", description="Time of the receipt.")
+    total_amount: Optional[float] = Field(
+        "no value", description="Total amount of the receipt."
+    )
+    total_vat: Optional[float] = Field("no value", description="Total VAT amount.")
+    payment_method: Optional[str] = Field(
+        "no value", description="Payment method used."
+    )
+    receipt_lines: Optional[List[ReceiptLine]] = Field(
+        default_factory=list, description="List of receipt lines."
+    )
+
+    class Config:
+        extra = "ignore"  # This will ignore any extra fields in the input data
